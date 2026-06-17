@@ -5,7 +5,6 @@ import Dashboard from "./pages/Dashboard";
 import CreateRolePage from "./pages/CreateRolePage";
 
 export default function App() {
-	const krunal = {};
 	return (
 		<div className="app">
 			<Router>
