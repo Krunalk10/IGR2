@@ -2,60 +2,45 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { validateLoginForm } from '../utils/validation'
 import { mockLoginCredentials } from '../data/staticData'
+import { loginUser, saveAuthData } from "../services/AuthService";
 
 export default function LoginForm({ userType }) {
-  const navigate = useNavigate()
-  const [loginId, setLoginId] = useState('')
-  const [password, setPassword] = useState('')
-  const [captcha, setCaptcha] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [errors, setErrors] = useState({})
-  const [successMessage, setSuccessMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate();
+  const [loginId, setLoginId] = useState("");
+  const [password, setPassword] = useState("");
+  const [captcha, setCaptcha] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const captchaAnswer = mockLoginCredentials.captchaAnswer
+  const captchaAnswer = mockLoginCredentials.captchaAnswer;
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setErrors({})
-    setSuccessMessage('')
+    e.preventDefault();
 
-    const validationErrors = validateLoginForm(loginId, password, captcha, captchaAnswer)
+    console.log("LOGIN BUTTON CLICKED");
 
-    if (validationErrors.length > 0) {
-      const errorMap = {}
-      validationErrors.forEach((error) => {
-        errorMap[error.field] = error.message
-      })
-      setErrors(errorMap)
-      return
-    }
+    const result = await loginUser(loginId, password);
 
-    setIsLoading(true)
-    setTimeout(() => {
-      setSuccessMessage('Login successful! Redirecting to dashboard...')
-      setTimeout(() => {
-        navigate('/dashboard')
-      }, 1500)
-      setIsLoading(false)
-    }, 1000)
-  }
+    console.log("RESULT:", result);
+  };
 
   const handleClear = () => {
-    setLoginId('')
-    setPassword('')
-    setCaptcha('')
-    setErrors({})
-    setSuccessMessage('')
-  }
+    setLoginId("");
+    setPassword("");
+    setCaptcha("");
+    setErrors({});
+    setSuccessMessage("");
+  };
 
   const handleErrorClear = (field) => {
     setErrors((prev) => {
-      const newErrors = { ...prev }
-      delete newErrors[field]
-      return newErrors
-    })
-  }
+      const newErrors = { ...prev };
+      delete newErrors[field];
+      return newErrors;
+    });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -68,7 +53,10 @@ export default function LoginForm({ userType }) {
 
       {/* Login ID Field */}
       <div>
-        <label htmlFor="loginId" className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+        <label
+          htmlFor="loginId"
+          className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide"
+        >
           LOGIN ID
         </label>
         <div className="relative">
@@ -77,39 +65,44 @@ export default function LoginForm({ userType }) {
             type="text"
             value={loginId}
             onChange={(e) => {
-              setLoginId(e.target.value)
-              handleErrorClear('loginId')
+              setLoginId(e.target.value);
+              handleErrorClear("loginId");
             }}
             placeholder="Enter Your User Id or Email Id"
             className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-colors ${
               errors.loginId
-                ? 'border-red-500 focus:ring-red-500'
-                : 'border-gray-300 focus:ring-blue-500'
+                ? "border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:ring-blue-500"
             }`}
           />
           <span className="absolute right-3 top-3 text-xl">👤</span>
         </div>
-        {errors.loginId && <p className="text-red-600 text-sm mt-1">{errors.loginId}</p>}
+        {errors.loginId && (
+          <p className="text-red-600 text-sm mt-1">{errors.loginId}</p>
+        )}
       </div>
 
       {/* Password Field */}
       <div>
-        <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+        <label
+          htmlFor="password"
+          className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide"
+        >
           PASSWORD
         </label>
         <div className="relative">
           <input
             id="password"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => {
-              setPassword(e.target.value)
-              handleErrorClear('password')
+              setPassword(e.target.value);
+              handleErrorClear("password");
             }}
             className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-colors ${
               errors.password
-                ? 'border-red-500 focus:ring-red-500'
-                : 'border-gray-300 focus:ring-blue-500'
+                ? "border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:ring-blue-500"
             }`}
           />
           <button
@@ -117,15 +110,20 @@ export default function LoginForm({ userType }) {
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-3 top-3 text-xl hover:opacity-70"
           >
-            {showPassword ? '👁️' : '👁️‍🗨️'}
+            {showPassword ? "👁️" : "👁️‍🗨️"}
           </button>
         </div>
-        {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password}</p>}
+        {errors.password && (
+          <p className="text-red-600 text-sm mt-1">{errors.password}</p>
+        )}
       </div>
 
       {/* CAPTCHA Field */}
       <div>
-        <label htmlFor="captcha" className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+        <label
+          htmlFor="captcha"
+          className="block text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide"
+        >
           CAPTCHA
         </label>
         <div className="flex gap-3">
@@ -138,14 +136,14 @@ export default function LoginForm({ userType }) {
               type="text"
               value={captcha}
               onChange={(e) => {
-                setCaptcha(e.target.value)
-                handleErrorClear('captcha')
+                setCaptcha(e.target.value);
+                handleErrorClear("captcha");
               }}
               placeholder="Enter CAPTCHA"
               className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition-colors ${
                 errors.captcha
-                  ? 'border-red-500 focus:ring-red-500'
-                  : 'border-gray-300 focus:ring-blue-500'
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
               }`}
             />
           </div>
@@ -156,7 +154,9 @@ export default function LoginForm({ userType }) {
             🔄
           </button>
         </div>
-        {errors.captcha && <p className="text-red-600 text-sm mt-1">{errors.captcha}</p>}
+        {errors.captcha && (
+          <p className="text-red-600 text-sm mt-1">{errors.captcha}</p>
+        )}
       </div>
 
       {/* Action Buttons */}
@@ -166,7 +166,7 @@ export default function LoginForm({ userType }) {
           disabled={isLoading}
           className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 rounded-lg transition-colors"
         >
-          {isLoading ? 'LOGGING IN...' : 'LOGIN'}
+          {isLoading ? "LOGGING IN..." : "LOGIN"}
         </button>
         <button
           type="button"
@@ -177,5 +177,5 @@ export default function LoginForm({ userType }) {
         </button>
       </div>
     </form>
-  )
+  );
 }

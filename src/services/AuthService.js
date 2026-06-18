@@ -1,0 +1,28 @@
+import { apiRequest } from "./ApiClient";
+
+export async function loginUser(username, password) {
+  const result = await apiRequest("/api/Auth/login", {
+    method: "POST",
+    body: JSON.stringify({
+      username,
+      password,
+    }),
+  });
+
+  if (!result.success) {
+    return result;
+  }
+
+  return {
+    success: true,
+    message: result.message,
+    user: result.data.user,
+    role: result.data.role,
+    accessToken: result.data.auth.accessToken,
+  };
+}
+
+export function saveAuthData(token, user) {
+  localStorage.setItem("accessToken", token);
+  localStorage.setItem("user", JSON.stringify(user));
+}

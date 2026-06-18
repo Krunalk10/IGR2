@@ -19,8 +19,12 @@ export default function Sidebar({ activePage, setActivePage, onLogout }) {
       {/* Logo Section */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-lg font-bold text-white">
-            🏛️
+          <div className="w-10 h-10 flex items-center justify-center">
+            <img
+              src="/IGRAuthoritySeal.png"
+              alt="IGR Authority Seal"
+              className="w-full h-full object-contain"
+            />
           </div>
           <h2 className="text-sm font-bold text-gray-900">ADMIN PORTAL</h2>
         </div>
@@ -34,8 +38,8 @@ export default function Sidebar({ activePage, setActivePage, onLogout }) {
             onClick={() => handleMenuClick(item.id)}
             className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors flex items-center gap-3 ${
               activePage === item.id
-                ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
-                : 'text-gray-700 hover:bg-gray-50'
+                ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                : "text-gray-700 hover:bg-gray-50"
             }`}
           >
             <span className="text-lg">{item.icon}</span>
@@ -54,5 +58,5 @@ export default function Sidebar({ activePage, setActivePage, onLogout }) {
         </button>
       </div>
     </aside>
-  )
+  );
 }
