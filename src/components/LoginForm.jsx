@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { validateLoginForm } from '../utils/validation'
 import { mockLoginCredentials } from '../data/staticData'
 import { loginUser, saveAuthData } from "../services/AuthService";
-const [message, setMessage] = useState("");
-const [messageType, setMessageType] = useState(""); // success | error
 
 export default function LoginForm({ userType }) {
   const navigate = useNavigate();
@@ -15,6 +13,8 @@ export default function LoginForm({ userType }) {
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
 
   const captchaAnswer = mockLoginCredentials.captchaAnswer;
 
