@@ -1,21 +1,31 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Sidebar from '../components/Sidebar'
-import Header from '../components/Header'
-import RoleList from '../components/RoleList'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+import RoleList from "../components/RoleList";
+import { logoutUser } from "../services/AuthService";
 
 export default function Dashboard() {
-  const navigate = useNavigate()
-  const [activePage, setActivePage] = useState('roles')
+  const navigate = useNavigate();
+  const [activePage, setActivePage] = useState("roles");
 
-  const handleLogout = () => {
-    navigate('/')
-  }
+  const handleLogout = async () => {
+    try {
+      const result = await logoutUser();
+
+      console.log("Logout Result:", result);
+    } catch (error) {
+      console.error("Logout Error:", error);
+    } finally {
+      localStorage.clear();
+      navigate("/");
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <Sidebar 
+      <Sidebar
         activePage={activePage}
         setActivePage={setActivePage}
         onLogout={handleLogout}
@@ -29,22 +39,28 @@ export default function Dashboard() {
         {/* Content Area */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-4 py-6">
-            {activePage === 'roles' && <RoleList />}
-            {activePage === 'office' && (
+            {activePage === "roles" && <RoleList />}
+            {activePage === "office" && (
               <div className="bg-white rounded-lg p-8 shadow">
-                <h2 className="text-2xl font-bold text-gray-900">Office Management</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Office Management
+                </h2>
                 <p className="text-gray-600 mt-4">Coming soon...</p>
               </div>
             )}
-            {activePage === 'employees' && (
+            {activePage === "employees" && (
               <div className="bg-white rounded-lg p-8 shadow">
-                <h2 className="text-2xl font-bold text-gray-900">Employee Management</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Employee Management
+                </h2>
                 <p className="text-gray-600 mt-4">Coming soon...</p>
               </div>
             )}
-            {activePage === 'zones' && (
+            {activePage === "zones" && (
               <div className="bg-white rounded-lg p-8 shadow">
-                <h2 className="text-2xl font-bold text-gray-900">Zone Management</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Zone Management
+                </h2>
                 <p className="text-gray-600 mt-4">Coming soon...</p>
               </div>
             )}
@@ -52,5 +68,5 @@ export default function Dashboard() {
         </main>
       </div>
     </div>
-  )
+  );
 }

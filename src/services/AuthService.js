@@ -26,3 +26,14 @@ export function saveAuthData(token, user) {
   localStorage.setItem("accessToken", token);
   localStorage.setItem("user", JSON.stringify(user));
 }
+
+export async function logoutUser() {
+  const result = await apiRequest("/api/Auth/logout", {
+    method: "POST",
+  });
+
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("user");
+
+  return result;
+}
