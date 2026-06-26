@@ -4,11 +4,12 @@ export default function Sidebar({ activePage, setActivePage, onLogout }) {
   const navigate = useNavigate()
 
   const menuItems = [
-    { id: 'roles', label: 'Role Management', icon: '🛡️' },
-    { id: 'office', label: 'Office Management', icon: '🏢' },
-    { id: 'employees', label: 'Employee Management', icon: '👥' },
-    { id: 'zones', label: 'Zone Management', icon: '🗺️' },
-  ]
+    { id: "dashboard", label: "Dashboard" },
+    { id: "roles", label: "Role Management" },
+    { id: "office", label: "Office Management" },
+    { id: "employees", label: "Employee Management" },
+    { id: "zones", label: "Zone Management" },
+  ];
 
   const handleMenuClick = (pageId) => {
     setActivePage(pageId)

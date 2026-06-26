@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
-import RoleList from "../components/RoleList";
-import { logoutUser } from "../services/AuthService";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
+import RoleList from "@/components/RoleList";
+import { logoutUser } from "@/services/AuthService";
+import Dashboard from "@/pages/admin/dashboard/Dashboard"
 
-export default function Dashboard() {
+export default function AdminPage() {
   const navigate = useNavigate();
-  const [activePage, setActivePage] = useState("roles");
+//   const [activePage, setActivePage] = useState("roles");
+  const [activePage, setActivePage] = useState("dashboard");
 
   const handleLogout = async () => {
     try {
@@ -39,29 +41,25 @@ export default function Dashboard() {
         {/* Content Area */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-4 py-6">
+            {activePage === "dashboard" && <Dashboard />}
+
             {activePage === "roles" && <RoleList />}
+
             {activePage === "office" && (
               <div className="bg-white rounded-lg p-8 shadow">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Office Management
-                </h2>
-                <p className="text-gray-600 mt-4">Coming soon...</p>
+                <h2>Office Management</h2>
               </div>
             )}
+
             {activePage === "employees" && (
               <div className="bg-white rounded-lg p-8 shadow">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Employee Management
-                </h2>
-                <p className="text-gray-600 mt-4">Coming soon...</p>
+                <h2>Employee Management</h2>
               </div>
             )}
+
             {activePage === "zones" && (
               <div className="bg-white rounded-lg p-8 shadow">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Zone Management
-                </h2>
-                <p className="text-gray-600 mt-4">Coming soon...</p>
+                <h2>Zone Management</h2>
               </div>
             )}
           </div>

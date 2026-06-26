@@ -1,19 +1,22 @@
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
-import Dashboard from "./pages/Dashboard";
+// import Dashboard from "./pages/Dashboard";
 import CreateRolePage from "./pages/CreateRolePage";
+import AdminPage from "./pages/admin/AdminPage";
+import Dashboard from "@/pages/admin/dashboard/Dashboard"
 
 export default function App() {
-	return (
-		<div className="app">
-			<Router>
-				<Routes>
-					<Route path="/" element={<LoginPage />} />
-					<Route path="/dashboard" element={<Dashboard />} />
-					<Route path="/dashboard/create-role" element={<CreateRolePage />} />
-				</Routes>
-			</Router>
-		</div>
-	);
+  return (
+    <div className="app">
+      <Router>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/create-role" element={<CreateRolePage />} />
+          <Route path="/admin" element={<AdminPage />} />
+        </Routes>
+      </Router>
+    </div>
+  );
 }

@@ -1,15 +1,15 @@
 // Role data structure
 export const RoleSchema = {
-  id: '',
-  nameEnglish: '',
-  nameMarathi: '',
-  description: '',
-  status: 'Active', // 'Active' | 'Inactive'
-  createdBy: '',
-  createdOn: '',
-  updatedBy: '',
-  updatedOn: '',
-}
+  id: "",
+  nameEnglish: "",
+  nameMarathi: "",
+  description: "",
+  status: "Active",
+  createdBy: "",
+  createdOn: "",
+  updatedBy: "",
+  updatedOn: "",
+};
 
 // User data structure
 export const UserSchema = {
