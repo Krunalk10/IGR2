@@ -18,7 +18,7 @@ export default function CreateRolePage() {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <Sidebar 
+      <Sidebar
         activePage="roles"
         setActivePage={() => {}}
         onLogout={handleLogout}
@@ -36,14 +36,16 @@ export default function CreateRolePage() {
               {/* Breadcrumb */}
               <div className="mb-6">
                 <button
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => navigate("/role-management")}
                   className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                 >
                   ← Back to Role List
                 </button>
               </div>
 
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Role</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Create Role
+              </h1>
               <p className="text-gray-600 mb-8 text-sm">
                 System Administration &gt; Role Management &gt; Create Role
               </p>
@@ -54,5 +56,5 @@ export default function CreateRolePage() {
         </main>
       </div>
     </div>
-  )
+  );
 }

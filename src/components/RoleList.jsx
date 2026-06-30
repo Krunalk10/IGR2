@@ -1,7 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { staticRoles } from '../data/staticData'
+// import { staticRoles } from '../data/staticData'
 import RoleDetailsModal from './RoleDetailsModal'
+import { getDemoRoles } from "../services/DemoRoleService";
+
 
 export default function RoleList() {
   const navigate = useNavigate()
@@ -10,9 +12,27 @@ export default function RoleList() {
   const [selectedRole, setSelectedRole] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const filteredRoles = useMemo(() => {
-    return staticRoles.filter((role) => {
-      const matchesSearch =
+  const [roles, setRoles] = useState([]);
+
+  useEffect(() => {
+    async function loadRoles() {
+      // ================= API ==================
+
+      const result = await getDemoRoles();
+
+      if (result.success) {
+        setRoles(result.data);
+      }
+
+      // ========================================
+    }
+
+    loadRoles();
+  }, []);
+
+const filteredRoles = useMemo(() => {
+    return roles.filter((role) => {
+     const matchesSearch =
         role.nameEnglish.toLowerCase().includes(searchQuery.toLowerCase()) ||
         role.nameMarathi.toLowerCase().includes(searchQuery.toLowerCase()) ||
         role.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -23,7 +43,22 @@ export default function RoleList() {
 
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [searchQuery, statusFilter])  
+
+  // const filteredRoles = useMemo(() => {
+  //   return staticRoles.filter((role) => {
+  //     const matchesSearch =
+  //       role.nameEnglish.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       role.nameMarathi.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       role.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       role.id.toLowerCase().includes(searchQuery.toLowerCase())
+
+  //     const matchesStatus =
+  //       statusFilter === 'All Roles' || role.status === statusFilter
+
+  //     return matchesSearch && matchesStatus
+  //   })
+  // }, [searchQuery, statusFilter])
 
   const handleViewRole = (role) => {
     setSelectedRole(role)

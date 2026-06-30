@@ -12,5 +12,14 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true,
-  },
+    proxy: {
+      '/api': {
+        target: 'http://13.232.164.116',
+        changeOrigin: true,
+        secure: false,
+        // No rewrite needed; forward path as is
+      }
+    }
+  }
+
 })
