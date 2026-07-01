@@ -411,6 +411,11 @@
       ? DIVISIONS.find((dv) => dv.key === hoveredDistrict.division)
       : null;
 
+    const handleMapLeave = () => {
+      setHoveredId(null);
+      setHoveredDivisionKey(null);
+    };
+
     return (
       <div
         style={{
@@ -422,20 +427,79 @@
             "'Noto Sans Devanagari', 'Mangal', 'Segoe UI', Arial, sans-serif",
           border: "3px solid #d1d5db",
           borderRadius: "12px",
-         boxSizing:"border-box"
+          scrollbarGutter: "stable", // reserves scrollbar space permanently, prevents width jump
         }}
       >
-        {/* ── PALETTE SWITCHER ── */}
+        {/* ── HEADER ── */}
         <div
           style={{
             display: "flex",
-            gap: "8px",
-            marginBottom: "12px",
             alignItems: "center",
-            flexWrap: "wrap",
+            justifyContent: "space-between",
+            padding: "6px 8px 16px",
           }}
         >
+          <div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: "#111827" }}>
+              महाराष्ट्र नकाशा
+            </div>
+            <div style={{ fontSize: 13, color: "#6b7280", marginTop: 2 }}>
+              विभाग व जिल्हानिहाय नकाशा — जिल्ह्यावर माऊस ठेवा
+            </div>
+          </div>
 
+          {selectedDivision && (
+            <button
+              onClick={() => setSelectedDivision(null)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "7px 14px",
+                borderRadius: 999,
+                border: "1.5px solid #d1d5db",
+                background: "#f9fafb",
+                color: "#374151",
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              {DIVISIONS.find((d) => d.key === selectedDivision)?.label}
+              <span style={{ fontSize: 15, lineHeight: 1 }}>×</span>
+            </button>
+          )}
+        </div>
+
+        {/* ── MAP + FLOATING TOOLTIP ── */}
+        <div style={{ position: "relative" }}>
+          {/* tooltip overlay — absolutely positioned, never affects layout */}
+          <div
+            style={{
+              position: "absolute",
+              top: 10,
+              right: 14,
+              zIndex: 2,
+              padding: "6px 16px",
+              borderRadius: 20,
+              background: hoveredDistrict
+                ? colors[hoveredDistrict.division]?.fill || "#e5e7eb"
+                : "transparent",
+              border: hoveredDistrict
+                ? "1.5px solid rgba(0,0,0,0.12)"
+                : "1.5px solid transparent",
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#1f2937",
+              pointerEvents: "none",
+              opacity: hoveredDistrict ? 1 : 0,
+              transform: hoveredDistrict ? "translateY(0)" : "translateY(-4px)",
+              transition: "opacity 0.12s ease, transform 0.12s ease",
+              whiteSpace: "nowrap",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            }}
+          ></div>
           {/* hover tooltip */}
           {hoveredDistrict && hoveredDivision && (
             <span
@@ -457,295 +521,330 @@
         </div>
 
         {/* ── MAP SVG ── */}
-        <svg
-          viewBox="0 0 3200 2200"
-          style={{ width: "100%", height: "auto", display: "block" }}
-          preserveAspectRatio="xMinYMin meet"
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            aspectRatio: "3200 / 2200",
+          }}
         >
-          <g transform="translate(250, 65.714286)">
-            {/* District fills */}
-            {DISTRICTS.map((district) => {
-              const c = colors[district.division] || {
-                fill: "#d9ebf9",
-                hover: "#a1cdff",
-              };
-              const hovered = hoveredId === district.id;
+          <svg
+            viewBox="0 0 3200 2200"
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+            }}
+            preserveAspectRatio="xMinYMin meet"
+            onMouseLeave={handleMapLeave}
+          >
+            <g transform="translate(250, 65.714286)">
+              {/* District fills */}
+              {DISTRICTS.map((district) => {
+                const c = colors[district.division] || {
+                  fill: "#d9ebf9",
+                  hover: "#a1cdff",
+                };
+                const hovered = hoveredId === district.id;
 
-              const isHoveredDivision =
-                hoveredDivisionKey === district.division;
+                const isHoveredDivision =
+                  hoveredDivisionKey === district.division;
 
-              const isSelectedDivision = selectedDivision === district.division;
+                const isSelectedDivision =
+                  selectedDivision === district.division;
 
-              const isActive =
-                hovered || isHoveredDivision || isSelectedDivision;
+                const isActive =
+                  hovered || isHoveredDivision || isSelectedDivision;
 
-              const isOtherDivision =
-                (selectedDivision && selectedDivision !== district.division) ||
-                (hoveredDivisionKey &&
-                  hoveredDivisionKey !== district.division);
+                const isOtherDivision =
+                  (selectedDivision &&
+                    selectedDivision !== district.division) ||
+                  (hoveredDivisionKey &&
+                    hoveredDivisionKey !== district.division);
 
-              const fill = isActive ? c.hover : c.fill;
-              const pathEl = (
-                <path
-                  key={district.id}
-                  d={district.d}
-                  fill={fill}
-                  stroke="#ffffff"
-                  strokeWidth={isActive ? 4 : 2.5}
-                  strokeLinejoin="round"
-                  style={{
-                    cursor: "pointer",
-                    transition: "fill 0.13s ease",
-                  }}
-                  onMouseEnter={() => setHoveredId(district.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                  opacity={isOtherDivision ? 0.25 : 1}
-                />
-              );
-              return district.pt ? (
-                <g key={district.id} transform={district.pt}>
-                  {pathEl}
-                </g>
-              ) : (
-                pathEl
-              );
-            })}
-
-            {/* District labels */}
-            {DISTRICTS.map((district) => {
-              const hovered = hoveredId === district.id;
-              // aurangabad label splits to 2 lines
-              if (district.id === "aurangabad") {
-                return (
-                  <g key={`lbl-${district.id}`} pointerEvents="none">
-                    <text
-                      x={district.cx}
-                      y={district.cy - 14}
-                      textAnchor="middle"
-                      fontSize={40}
-                      fontWeight="600"
-                      fill={hovered ? "#ffffff" : "#1f2937"}
-                      stroke={hovered ? "none" : "#ffffff"}
-                      strokeWidth={3}
-                      paintOrder="stroke"
-                      style={{
-                        fontFamily:
-                          "'Noto Sans Devanagari', Mangal, Arial, sans-serif",
-                      }}
-                    >
-                      छत्रपती
-                    </text>
-                    <text
-                      x={district.cx}
-                      y={district.cy + 25}
-                      textAnchor="middle"
-                      fontSize={40}
-                      fontWeight="700"
-                      fill={hovered ? "#ffffff" : "#1f2937"}
-                      stroke={hovered ? "none" : "#ffffff"}
-                      strokeWidth={3}
-                      paintOrder="stroke"
-                      style={{
-                        fontFamily:
-                          "'Noto Sans Devanagari', Mangal, Arial, sans-serif",
-                      }}
-                    >
-                      संभाजीनगर
-                    </text>
-                  </g>
-                );
-              }
-              // mumbai upnagar — small, 2 lines
-              if (district.id === "mumbai_upnagar") {
-                return (
-                  <g key={`lbl-${district.id}`} pointerEvents="none">
-                    <text
-                      x={district.cx}
-                      y={district.cy - 20}
-                      textAnchor="middle"
-                      fontSize={40}
-                      fontWeight="700"
-                      fill={hovered ? "#ffffff" : "#1f2937"}
-                      stroke="#ffffff"
-                      strokeWidth={2.5}
-                      paintOrder="stroke"
-                      style={{
-                        fontFamily:
-                          "'Noto Sans Devanagari', Mangal, Arial, sans-serif",
-                      }}
-                    >
-                      मुंबई
-                    </text>
-                    <text
-                      x={district.cx}
-                      y={district.cy + 12}
-                      textAnchor="middle"
-                      fontSize={40}
-                      fontWeight="700"
-                      fill={hovered ? "#ffffff" : "#1f2937"}
-                      stroke="#ffffff"
-                      strokeWidth={2.5}
-                      paintOrder="stroke"
-                      style={{
-                        fontFamily:
-                          "'Noto Sans Devanagari', Mangal, Arial, sans-serif",
-                      }}
-                    >
-                      उपनगर
-                    </text>
-                  </g>
-                );
-              }
-              if (district.id === "mumbai_city") {
-                return (
-                  <g key={`lbl-${district.id}`} pointerEvents="none">
-                    <text
-                      x={district.cx}
-                      y={district.cy - 18}
-                      textAnchor="middle"
-                      fontSize={40}
-                      fontWeight="700"
-                      fill={hovered ? "#ffffff" : "#1f2937"}
-                      stroke="#ffffff"
-                      strokeWidth={2.5}
-                      paintOrder="stroke"
-                    >
-                      मुंबई
-                    </text>
-
-                    <text
-                      x={district.cx}
-                      y={district.cy + 22}
-                      textAnchor="middle"
-                      fontSize={40}
-                      fontWeight="700"
-                      fill={hovered ? "#ffffff" : "#1f2937"}
-                      stroke="#ffffff"
-                      strokeWidth={2.5}
-                      paintOrder="stroke"
-                    >
-                      शहर
-                    </text>
-                  </g>
-                );
-              }
-              return (
-                <text
-                  key={`lbl-${district.id}`}
-                  x={district.cx}
-                  y={district.cy}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fontSize={
-                    district.id === "thane" || district.id === "palghar"
-                      ? 44
-                      : 40
-                  }
-                  fontWeight="700"
-                  fill={hovered ? "#ffffff" : "#1f2937"}
-                  stroke={hovered ? "none" : "#ffffff"}
-                  strokeWidth={3}
-                  paintOrder="stroke"
-                  pointerEvents="none"
-                  style={{
-                    fontFamily:
-                      "'Noto Sans Devanagari', Mangal, Arial, sans-serif",
-                  }}
-                >
-                  {district.hi}
-                </text>
-              );
-            })}
-
-            {/* ── INLINE LEGEND (inside SVG, bottom-right) ── */}
-            {/* Background rect */}
-            <rect
-              x={LEG_X - 12}
-              y={LEG_Y - 14}
-              width={LEG_W + 24}
-              height={DIVISIONS.length * LEG_ROW + 28}
-              rx={16}
-              ry={16}
-              fill="#ffffff"
-              fillOpacity={0.92}
-              stroke="#e5e7eb"
-              strokeWidth={2}
-            />
-
-            {DIVISIONS.map((div, i) => {
-              const c = colors[div.key];
-              const isHighlighted =
-                hoveredDistrict?.division === div.key ||
-                hoveredDivisionKey === div.key ||
-                selectedDivision === div.key;
-              const ry = LEG_Y + i * LEG_ROW;
-
-              return (
-                <g
-                  key={`leg-${div.key}`}
-                  style={{ cursor: "pointer" }}
-                  onMouseEnter={() => setHoveredDivisionKey(div.key)}
-                  onMouseLeave={() => setHoveredDivisionKey(null)}
-                  onClick={() =>
-                    setSelectedDivision(
-                      selectedDivision === div.key ? null : div.key,
-                    )
-                  }
-                >
-                  {/* highlight row bg */}
-                  {isHighlighted && (
-                    <rect
-                      x={LEG_X - 8}
-                      y={ry - 8}
-                      width={LEG_W + 16}
-                      height={LEG_ROW - 4}
-                      rx={10}
-                      fill={c.fill}
-                      fillOpacity={0.35}
-                    />
-                  )}
-                  {/* swatch */}
-                  <rect
-                    x={LEG_X}
-                    y={ry}
-                    width={SW}
-                    height={SW}
-                    rx={8}
-                    ry={8}
-                    fill={c.fill}
-                    // stroke={isHighlighted ? c.hover : "rgba(0,0,0,0.15)"}
-                    // strokeWidth={isHighlighted ? 3 : 1.5}
-                    stroke={
-                      selectedDivision === div.key
-                        ? "#111827"
-                        : isHighlighted
-                          ? c.hover
-                          : "rgba(0,0,0,0.15)"
-                    }
-                    strokeWidth={
-                      selectedDivision === div.key ? 4 : isHighlighted ? 3 : 1.5
-                    }
+                const fill = isActive ? c.hover : c.fill;
+                const pathEl = (
+                  <path
+                    key={district.id}
+                    d={district.d}
+                    fill={fill}
+                    // FIX 1: Keep stroke width constant to stop layout shifting,
+                    // or use a separate layer for borders.
+                    stroke={isActive ? "#ffffff" : "#ffffff"}
+                    strokeWidth={4} // Keep it 4 constantly so elements never shift size
+                    strokeLinejoin="round"
+                    style={{
+                      cursor: "pointer",
+                      transition: "fill 0.13s ease, stroke 0.13s ease",
+                      paintOrder: "fill stroke markers",
+                      shapeRendering: "geometricPrecision",
+                    }}
+                    onMouseEnter={() => setHoveredId(district.id)}
+                    onMouseMove={() => setHoveredId(district.id)}
+                    onMouseLeave={handleMapLeave}
+                    pointerEvents="visiblePainted"
+                    opacity={isOtherDivision ? 0.25 : 1}
                   />
-                  {/* label */}
+                );
+
+                return district.pt ? (
+                  <g key={district.id} transform={district.pt}>
+                    {pathEl}
+                  </g>
+                ) : (
+                  pathEl
+                );
+              })}
+
+              {/* District labels */}
+              {DISTRICTS.map((district) => {
+                const hovered = hoveredId === district.id;
+                // aurangabad label splits to 2 lines
+                if (district.id === "aurangabad") {
+                  return (
+                    <g key={`lbl-${district.id}`} pointerEvents="none">
+                      <text
+                        x={district.cx}
+                        y={district.cy - 14}
+                        textAnchor="middle"
+                        fontSize={40}
+                        fontWeight="600"
+                        fill={hovered ? "#ffffff" : "#1f2937"}
+                        stroke={hovered ? "none" : "#ffffff"}
+                        strokeWidth={3}
+                        paintOrder="stroke"
+                        style={{
+                          fontFamily:
+                            "'Noto Sans Devanagari', Mangal, Arial, sans-serif",
+                        }}
+                      >
+                        छत्रपती
+                      </text>
+                      <text
+                        x={district.cx}
+                        y={district.cy + 25}
+                        textAnchor="middle"
+                        fontSize={40}
+                        fontWeight="700"
+                        fill={hovered ? "#ffffff" : "#1f2937"}
+                        stroke={hovered ? "none" : "#ffffff"}
+                        strokeWidth={3}
+                        paintOrder="stroke"
+                        style={{
+                          fontFamily:
+                            "'Noto Sans Devanagari', Mangal, Arial, sans-serif",
+                        }}
+                      >
+                        संभाजीनगर
+                      </text>
+                    </g>
+                  );
+                }
+                // mumbai upnagar — small, 2 lines
+                if (district.id === "mumbai_upnagar") {
+                  return (
+                    <g key={`lbl-${district.id}`} pointerEvents="none">
+                      <text
+                        x={district.cx}
+                        y={district.cy - 20}
+                        textAnchor="middle"
+                        fontSize={40}
+                        fontWeight="700"
+                        fill={hovered ? "#ffffff" : "#1f2937"}
+                        stroke="#ffffff"
+                        strokeWidth={2.5}
+                        paintOrder="stroke"
+                        style={{
+                          fontFamily:
+                            "'Noto Sans Devanagari', Mangal, Arial, sans-serif",
+                        }}
+                      >
+                        मुंबई
+                      </text>
+                      <text
+                        x={district.cx}
+                        y={district.cy + 12}
+                        textAnchor="middle"
+                        fontSize={40}
+                        fontWeight="700"
+                        fill={hovered ? "#ffffff" : "#1f2937"}
+                        stroke="#ffffff"
+                        strokeWidth={2.5}
+                        paintOrder="stroke"
+                        style={{
+                          fontFamily:
+                            "'Noto Sans Devanagari', Mangal, Arial, sans-serif",
+                        }}
+                      >
+                        उपनगर
+                      </text>
+                    </g>
+                  );
+                }
+                if (district.id === "mumbai_city") {
+                  return (
+                    <g key={`lbl-${district.id}`} pointerEvents="none">
+                      <text
+                        x={district.cx}
+                        y={district.cy - 18}
+                        textAnchor="middle"
+                        fontSize={40}
+                        fontWeight="700"
+                        fill={hovered ? "#ffffff" : "#1f2937"}
+                        stroke="#ffffff"
+                        strokeWidth={2.5}
+                        paintOrder="stroke"
+                        style={{
+                          fontFamily:
+                            "'Noto Sans Devanagari', Mangal, Arial, sans-serif",
+                        }}
+                      >
+                        मुंबई
+                      </text>
+
+                      <text
+                        x={district.cx}
+                        y={district.cy + 22}
+                        textAnchor="middle"
+                        fontSize={40}
+                        fontWeight="700"
+                        fill={hovered ? "#ffffff" : "#1f2937"}
+                        stroke="#ffffff"
+                        strokeWidth={2.5}
+                        paintOrder="stroke"
+                        style={{
+                          fontFamily:
+                            "'Noto Sans Devanagari', Mangal, Arial, sans-serif",
+                        }}
+                      >
+                        शहर
+                      </text>
+                    </g>
+                  );
+                }
+                return (
                   <text
-                    x={LEG_X + SW + 16}
-                    y={ry + SW / 2}
+                    key={`lbl-${district.id}`}
+                    x={district.cx}
+                    y={district.cy}
+                    textAnchor="middle"
                     dominantBaseline="middle"
-                    fontSize={26}
-                    fontWeight={isHighlighted ? "800" : "600"}
-                    fill={isHighlighted ? "#1f2937" : "#374151"}
+                    fontSize={
+                      district.id === "thane" || district.id === "palghar"
+                        ? 44
+                        : 40
+                    }
+                    fontWeight="700"
+                    fill={hovered ? "#ffffff" : "#1f2937"}
+                    stroke={hovered ? "none" : "#ffffff"}
+                    strokeWidth={3}
+                    paintOrder="stroke"
+                    pointerEvents="none"
                     style={{
                       fontFamily:
                         "'Noto Sans Devanagari', Mangal, Arial, sans-serif",
                     }}
                   >
-                    {div.label}
+                    {district.hi}
                   </text>
-                </g>
-              );
-            })}
-          </g>
-        </svg>
+                );
+              })}
+
+              {/* ── INLINE LEGEND (inside SVG, bottom-right) ── */}
+              {/* Background rect */}
+              <rect
+                x={LEG_X - 12}
+                y={LEG_Y - 14}
+                width={LEG_W + 24}
+                height={DIVISIONS.length * LEG_ROW + 28}
+                rx={16}
+                ry={16}
+                fill="#ffffff"
+                fillOpacity={0.92}
+                stroke="#e5e7eb"
+                strokeWidth={2}
+              />
+
+              {DIVISIONS.map((div, i) => {
+                const c = colors[div.key];
+                const isHighlighted =
+                  hoveredDistrict?.division === div.key ||
+                  hoveredDivisionKey === div.key ||
+                  selectedDivision === div.key;
+                const ry = LEG_Y + i * LEG_ROW;
+
+                return (
+                  <g
+                    key={`leg-${div.key}`}
+                    style={{ cursor: "pointer" }}
+                    onMouseEnter={() => setHoveredDivisionKey(div.key)}
+                    onMouseLeave={() => setHoveredDivisionKey(null)}
+                    onClick={() =>
+                      setSelectedDivision(
+                        selectedDivision === div.key ? null : div.key,
+                      )
+                    }
+                  >
+                    {/* highlight row bg */}
+                    {isHighlighted && (
+                      <rect
+                        x={LEG_X - 8}
+                        y={ry - 8}
+                        width={LEG_W + 16}
+                        height={LEG_ROW - 4}
+                        rx={10}
+                        fill={c.fill}
+                        fillOpacity={0.35}
+                      />
+                    )}
+                    {/* swatch */}
+                    <rect
+                      x={LEG_X}
+                      y={ry}
+                      width={SW}
+                      height={SW}
+                      rx={8}
+                      ry={8}
+                      fill={c.fill}
+                      // stroke={isHighlighted ? c.hover : "rgba(0,0,0,0.15)"}
+                      // strokeWidth={isHighlighted ? 3 : 1.5}
+                      stroke={
+                        selectedDivision === div.key
+                          ? "#111827"
+                          : isHighlighted
+                            ? c.hover
+                            : "rgba(0,0,0,0.15)"
+                      }
+                      strokeWidth={
+                        selectedDivision === div.key
+                          ? 4
+                          : isHighlighted
+                            ? 3
+                            : 1.5
+                      }
+                    />
+                    {/* label */}
+                    <text
+                      x={LEG_X + SW + 16}
+                      y={ry + SW / 2}
+                      dominantBaseline="middle"
+                      fontSize={26}
+                      fontWeight={isHighlighted ? "800" : "600"}
+                      fill={isHighlighted ? "#1f2937" : "#374151"}
+                      style={{
+                        fontFamily:
+                          "'Noto Sans Devanagari', Mangal, Arial, sans-serif",
+                      }}
+                    >
+                      {div.label}
+                    </text>
+                  </g>
+                );
+              })}
+            </g>
+          </svg>
+        </div>
       </div>
     );
   }

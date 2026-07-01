@@ -129,19 +129,19 @@ package.json               # Dependencies & scripts
 ### Development Server
 ```bash
 cd /vercel/share/v0-project
-pnpm dev
+npm run dev
 # Server starts on http://localhost:3001
 ```
 
 ### Build for Production
 ```bash
-pnpm build
+npm run build
 # Creates optimized build in dist/ directory
 ```
 
 ### Preview Build
 ```bash
-pnpm preview
+npm run preview
 # Serves the production build locally
 ```
 

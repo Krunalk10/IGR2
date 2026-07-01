@@ -40,12 +40,12 @@ project/
 
 ### 1. **Install Dependencies**
 ```bash
-pnpm install
+npm install
 ```
 
 ### 2. **Start Development Server**
 ```bash
-pnpm dev
+npm run dev
 ```
 
 The app will be available at: **http://localhost:3000**
@@ -58,8 +58,8 @@ Use these demo credentials:
 
 ### 4. **Build for Production**
 ```bash
-pnpm build
-pnpm start
+npm run build
+npm run preview
 ```
 
 ## Key Features
@@ -142,7 +142,7 @@ Edit `app/globals.css` for color tokens, or update tailwind classes in component
 
 This project uses:
 - **Node.js** 18+
-- **pnpm** (or npm/yarn)
+- **npm** (or yarn)
 - **Next.js** 16
 - **React** 19
 - **TypeScript** 5
@@ -154,19 +154,19 @@ This project uses:
 ```bash
 # Clear cache and reinstall
 rm -rf .next node_modules
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 ### Port 3000 already in use
 ```bash
-pnpm dev -p 3001  # Use different port
+npm run dev -- --port 3001  # Use different port
 ```
 
 ### TypeScript errors
 ```bash
 # Check for errors
-pnpm tsc --noEmit
+npx tsc --noEmit
 ```
 
 ### Styling not applied

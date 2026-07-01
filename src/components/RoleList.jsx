@@ -1,69 +1,86 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-// import { staticRoles } from '../data/staticData'
-import RoleDetailsModal from './RoleDetailsModal'
-import { getDemoRoles } from "../services/DemoRoleService";
-
+import { useLocation, useNavigate } from "react-router-dom";
+import CreateRoleForm from "./CreateRoleForm";
+import { deleteRole, getRoles } from "../services/AuthService";
 
 export default function RoleList() {
-  const navigate = useNavigate()
-  const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('All Roles')
-  const [selectedRole, setSelectedRole] = useState(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All Roles");
+  const [selectedRole, setSelectedRole] = useState(null);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const loadRoles = async () => {
+    setLoading(true);
+    const result = await getRoles();
+    setLoading(false);
+
+    if (result.success) {
+      setRoles(result.data || []);
+      setErrorMessage("");
+    } else {
+      setErrorMessage(result.message || "Unable to load roles");
+    }
+  };
 
   useEffect(() => {
-    async function loadRoles() {
-      // ================= API ==================
-
-      const result = await getDemoRoles();
-
-      if (result.success) {
-        setRoles(result.data);
-      }
-
-      // ========================================
-    }
-
     loadRoles();
   }, []);
 
-const filteredRoles = useMemo(() => {
-    return roles.filter((role) => {
-     const matchesSearch =
-        role.nameEnglish.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        role.nameMarathi.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        role.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        role.id.toLowerCase().includes(searchQuery.toLowerCase())
+  useEffect(() => {
+    if (location.state?.refreshRoles) {
+      loadRoles();
+    }
+  }, [location.state?.refreshRoles]);
 
+  const filteredRoles = useMemo(() => {
+    return (roles || []).filter((role) => {
+      const searchText =
+        `${role.nameEnglish || ""} ${role.nameMarathi || ""} ${role.description || ""} ${role.id || ""}`.toLowerCase();
+      const matchesSearch = searchText.includes(searchQuery.toLowerCase());
       const matchesStatus =
-        statusFilter === 'All Roles' || role.status === statusFilter
-
-      return matchesSearch && matchesStatus
-    })
-  }, [searchQuery, statusFilter])  
-
-  // const filteredRoles = useMemo(() => {
-  //   return staticRoles.filter((role) => {
-  //     const matchesSearch =
-  //       role.nameEnglish.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //       role.nameMarathi.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //       role.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //       role.id.toLowerCase().includes(searchQuery.toLowerCase())
-
-  //     const matchesStatus =
-  //       statusFilter === 'All Roles' || role.status === statusFilter
-
-  //     return matchesSearch && matchesStatus
-  //   })
-  // }, [searchQuery, statusFilter])
+        statusFilter === "All Roles" || role.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [roles, searchQuery, statusFilter]);
 
   const handleViewRole = (role) => {
-    setSelectedRole(role)
-    setIsModalOpen(true)
-  }
+    setSelectedRole(role);
+    setIsFormModalOpen(true);
+  };
+
+  const handleRoleFormSuccess = (role) => {
+    setRoles((prev) => {
+      const existing = prev.find((item) => String(item.id) === String(role.id));
+      if (existing) {
+        return prev.map((item) =>
+          String(item.id) === String(role.id) ? role : item,
+        );
+      }
+      return [role, ...prev];
+    });
+    setIsFormModalOpen(false);
+    setSelectedRole(null);
+  };
+
+  const handleDeleteRole = async (roleId) => {
+    const confirmed = window.confirm("Delete this role?");
+    if (!confirmed) return;
+
+    const result = await deleteRole(roleId);
+    if (result.success) {
+      setRoles((prev) =>
+        prev.filter((role) => String(role.id) !== String(roleId)),
+      );
+      await loadRoles();
+    } else {
+      setErrorMessage(result.message || "Unable to delete role");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -79,7 +96,7 @@ const filteredRoles = useMemo(() => {
             </p>
           </div>
           <button
-            onClick={() => navigate("/dashboard/create-role")}
+            onClick={() => navigate("/admin/roles/create")}
             className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
           >
             ➕ Add Role
@@ -87,6 +104,11 @@ const filteredRoles = useMemo(() => {
         </div>
 
         {/* Search and Filter */}
+        {errorMessage && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {errorMessage}
+          </div>
+        )}
         <div className="flex gap-4">
           <div className="flex-1">
             <input
@@ -106,7 +128,10 @@ const filteredRoles = useMemo(() => {
             <option>Active</option>
             <option>Inactive</option>
           </select>
-          <button className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors">
+          <button
+            onClick={loadRoles}
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
+          >
             🔄
           </button>
         </div>
@@ -142,61 +167,82 @@ const filteredRoles = useMemo(() => {
               </tr>
             </thead>
             <tbody>
-              {filteredRoles.map((role) => (
-                <tr
-                  key={role.id}
-                  className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-6 py-4 text-sm text-blue-600 font-semibold">
-                    {role.id}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 font-medium">
-                    {role.nameEnglish}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">
-                    {role.nameMarathi}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
-                    {role.description}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <span
-                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full font-semibold ${
-                        role.status === "Active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {/* {role.status === 'Active' ? '🟢' : '🔴'}  */}
-                      {role.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">
-                    {role.createdBy}
-                  </td>
-                  <td className="px-6 py-4 text-sm space-x-3">
-                    <button
-                      onClick={() => handleViewRole(role)}
-                      className="text-blue-600 hover:text-blue-800 transition-colors"
-                      title="View details"
-                    >
-                      👁️
-                    </button>
-                    <button
-                      className="text-amber-600 hover:text-amber-800 transition-colors"
-                      title="Edit role"
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      className="text-red-600 hover:text-red-800 transition-colors"
-                      title="Delete role"
-                    >
-                      🗑️
-                    </button>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan="7"
+                    className="px-6 py-8 text-center text-sm text-gray-600"
+                  >
+                    Loading roles...
                   </td>
                 </tr>
-              ))}
+              ) : filteredRoles.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="7"
+                    className="px-6 py-8 text-center text-sm text-gray-600"
+                  >
+                    No roles found.
+                  </td>
+                </tr>
+              ) : (
+                filteredRoles.map((role) => (
+                  <tr
+                    key={role.id}
+                    className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 text-sm text-blue-600 font-semibold">
+                      {role.id}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">
+                      {role.nameEnglish}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {role.nameMarathi}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
+                      {role.description}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full font-semibold ${
+                          role.status === "Active"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {role.status === "Active" ? "🟢" : "🔴"}
+                        {role.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {role.createdBy}
+                    </td>
+                    <td className="px-6 py-4 text-sm space-x-3">
+                      <button
+                        onClick={() => handleViewRole(role)}
+                        className="text-blue-600 hover:text-blue-800 transition-colors"
+                        title="View details"
+                      >
+                        👁️
+                      </button>
+                      <button
+                        className="text-amber-600 hover:text-amber-800 transition-colors"
+                        title="Edit role"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => handleDeleteRole(role.id)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                        title="Delete role"
+                      >
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -221,13 +267,35 @@ const filteredRoles = useMemo(() => {
         </div>
       </div>
 
-      {/* Role Details Modal */}
-      {isModalOpen && selectedRole && (
-        <RoleDetailsModal
-          role={selectedRole}
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
+      {/* Role Form Modal */}
+      {isFormModalOpen && selectedRole && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/30 px-4 py-6 backdrop-blur-sm">
+          <div className="w-full max-w-3xl rounded-2xl border border-white/70 bg-white/85 p-4 shadow-2xl backdrop-blur-md sm:p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Edit Role
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Update the role details and save changes.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsFormModalOpen(false)}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Close
+              </button>
+            </div>
+            <CreateRoleForm
+              initialRole={selectedRole}
+              mode="edit"
+              onCancel={() => setIsFormModalOpen(false)}
+              setRoles={setRoles}
+              onSuccess={handleRoleFormSuccess}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

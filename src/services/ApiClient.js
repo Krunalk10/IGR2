@@ -15,20 +15,35 @@ export async function apiRequest(endpoint, options = {}) {
 
     console.log("Response Status:", response.status);
 
-    const result = await response.json();
+    const text = await response.text();
+    let result = {};
+
+    if (text) {
+      try {
+        result = JSON.parse(text);
+      } catch {
+        result = { message: text };
+      }
+    }
 
     console.log("Response Data:", result);
 
     if (!response.ok || result.success === false) {
       return {
         success: false,
+        status: response.status,
         message:
           result?.message ||
           `Request failed (${response.status}). Please try again.`,
       };
     }
 
-    return result;
+    return {
+      success: true,
+      status: response.status,
+      ...result,
+      data: result?.data ?? result,
+    };
   } catch (error) {
     console.error(`API request to ${endpoint} failed:`, error);
 

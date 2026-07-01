@@ -1,15 +1,23 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import RoleList from "@/components/RoleList";
 import { logoutUser } from "@/services/AuthService";
-import Dashboard from "@/pages/admin/dashboard/Dashboard"
+import Dashboard from "@/pages/admin/dashboard/Dashboard";
 
 export default function AdminPage() {
   const navigate = useNavigate();
-//   const [activePage, setActivePage] = useState("roles");
-  const [activePage, setActivePage] = useState("dashboard");
+  const location = useLocation();
+
+  const getActivePage = (pathname) => {
+    if (pathname.includes("/roles")) return "roles";
+    if (pathname.includes("/office")) return "office";
+    if (pathname.includes("/employees")) return "employees";
+    if (pathname.includes("/zones")) return "zones";
+    return "dashboard";
+  };
+
+  const activePage = getActivePage(location.pathname);
 
   const handleLogout = async () => {
     try {
@@ -29,7 +37,7 @@ export default function AdminPage() {
       {/* Sidebar */}
       <Sidebar
         activePage={activePage}
-        setActivePage={setActivePage}
+        setActivePage={() => {}}
         onLogout={handleLogout}
       />
 

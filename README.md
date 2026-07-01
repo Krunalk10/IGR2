@@ -18,7 +18,7 @@ Environment variables allow you to configure the application without changing co
 **Quick Start:**
 ```bash
 cp .env.example .env.local
-pnpm dev
+npm run dev
 ```
 
 See `ENV_QUICK_START.md` for quick reference and `ENV_CONFIG.md` for complete documentation.
@@ -173,12 +173,12 @@ The application includes pre-loaded data for 5 roles:
 
 1. Install dependencies:
 ```bash
-pnpm install
+npm install
 ```
 
 2. Start development server:
 ```bash
-pnpm dev
+npm run dev
 ```
 
 3. Open http://localhost:3000 in your browser

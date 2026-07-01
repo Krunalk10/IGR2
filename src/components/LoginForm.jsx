@@ -56,7 +56,7 @@ export default function LoginForm({ userType }) {
         setMessageType("success");
 
         setTimeout(() => {
-          navigate("/dashboard");
+          navigate("/admin");
         }, 1000);
       } else {
         setMessage(result?.message || "Invalid username or password");

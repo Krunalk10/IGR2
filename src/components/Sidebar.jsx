@@ -4,16 +4,23 @@ export default function Sidebar({ activePage, setActivePage, onLogout }) {
   const navigate = useNavigate()
 
   const menuItems = [
-    { id: "dashboard", label: "Dashboard" },
-    { id: "roles", label: "Role Management" },
-    { id: "office", label: "Office Management" },
-    { id: "employees", label: "Employee Management" },
-    { id: "zones", label: "Zone Management" },
+    { id: "dashboard", label: "Dashboard", route: "/admin/dashboard" },
+    { id: "roles", label: "Role Management", route: "/admin/roles" },
+    { id: "office", label: "Office Management", route: "/admin/office" },
+    {
+      id: "employees",
+      label: "Employee Management",
+      route: "/admin/employees",
+    },
+    { id: "zones", label: "Zone Management", route: "/admin/zones" },
   ];
 
-  const handleMenuClick = (pageId) => {
-    setActivePage(pageId)
-  }
+  const handleMenuClick = (pageId, route) => {
+    if (setActivePage) {
+      setActivePage(pageId);
+    }
+    navigate(route);
+  };
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
@@ -36,7 +43,7 @@ export default function Sidebar({ activePage, setActivePage, onLogout }) {
         {menuItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => handleMenuClick(item.id)}
+            onClick={() => handleMenuClick(item.id, item.route)}
             className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors flex items-center gap-3 ${
               activePage === item.id
                 ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
