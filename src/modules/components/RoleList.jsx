@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useLocation, useNavigate } from "react-router-dom";
 import CreateRoleForm from "./CreateRoleForm";
-import { deleteRole, getRoles } from "../services/AuthService";
+import { deleteRole, getRoles } from "../../features/roles/services/roleService";
+import { ROUTES } from "../routes/routeConfig";
 
 export default function RoleList() {
   const navigate = useNavigate();
@@ -96,7 +97,7 @@ export default function RoleList() {
             </p>
           </div>
           <button
-            onClick={() => navigate("/admin/roles/create")}
+            onClick={() => navigate(ROUTES.adminCreateRole)}
             className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
           >
             ➕ Add Role

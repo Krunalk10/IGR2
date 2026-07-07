@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom'
-import Sidebar from '../components/Sidebar'
-import Header from '../components/Header'
-import CreateRoleForm from '../components/CreateRoleForm'
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+import CreateRoleForm from "../components/CreateRoleForm";
+import { ROUTES } from "../routes/routeConfig";
 
 
 export default function CreateRolePage() {
@@ -12,7 +13,7 @@ export default function CreateRolePage() {
   }
 
   const handleCancel = () => {
-    navigate("/admin/roles");
+    navigate(ROUTES.adminRoles);
   };
 
   return (
@@ -37,7 +38,7 @@ export default function CreateRolePage() {
               <div className="mb-6 flex flex-col gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <button
-                    onClick={() => navigate("/admin/")}
+                    onClick={() => navigate(ROUTES.adminRoles)}
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                   >
                     ← Back to Role List

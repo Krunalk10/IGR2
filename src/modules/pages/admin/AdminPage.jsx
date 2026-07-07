@@ -1,9 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
-import RoleList from "@/components/RoleList";
-import { logoutUser } from "@/services/AuthService";
-import Dashboard from "@/pages/admin/dashboard/Dashboard";
+import Sidebar from "@/modules/components/Sidebar";
+import Header from "@/modules/components/Header";
+import RoleList from "@/modules/components/RoleList";
+import { logoutUser } from "@/features/auth/services/authService";
+import Dashboard from "@/modules/pages/admin/dashboard/Dashboard";
+import { ROUTES } from "@/modules/routes/routeConfig";
 
 export default function AdminPage() {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export default function AdminPage() {
       console.error("Logout Error:", error);
     } finally {
       localStorage.clear();
-      navigate("/");
+      navigate(ROUTES.root);
     }
   };
 

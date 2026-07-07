@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import LoginForm from '../components/LoginForm'
-import { adminPortalTabs, services } from '../data/staticData'
+import LoginForm from "../components/LoginForm";
+import { adminPortalTabs, services } from '../../data/staticData'
 
 export default function LoginPage() {
   const [selectedTab, setSelectedTab] = useState('admin')

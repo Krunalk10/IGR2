@@ -1,18 +1,19 @@
 import { useNavigate } from 'react-router-dom'
+import { ROUTES } from '../routes/routeConfig'
 
 export default function Sidebar({ activePage, setActivePage, onLogout }) {
   const navigate = useNavigate()
 
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", route: "/admin/dashboard" },
-    { id: "roles", label: "Role Management", route: "/admin/roles" },
-    { id: "office", label: "Office Management", route: "/admin/office" },
+    { id: "dashboard", label: "Dashboard", route: ROUTES.adminDashboard },
+    { id: "roles", label: "Role Management", route: ROUTES.adminRoles },
+    { id: "office", label: "Office Management", route: ROUTES.adminOffice },
     {
       id: "employees",
       label: "Employee Management",
-      route: "/admin/employees",
+      route: ROUTES.adminEmployees,
     },
-    { id: "zones", label: "Zone Management", route: "/admin/zones" },
+    { id: "zones", label: "Zone Management", route: ROUTES.adminZones },
   ];
 
   const handleMenuClick = (pageId, route) => {

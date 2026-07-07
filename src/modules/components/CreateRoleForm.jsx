@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { validateCreateRoleForm } from "../utils/validation";
-import { createRole, updateRole } from "../services/AuthService";
+import { validateCreateRoleForm } from "../../shared/utils/validation";
+import { createRole, updateRole } from "../../features/roles/services/roleService";
+import { ROUTES } from "../routes/routeConfig";
 
 export default function CreateRoleForm({
   onCancel,
@@ -81,19 +82,13 @@ export default function CreateRoleForm({
       return;
     }
 
-    const payload = {
-      id: initialRole?.id || initialRole?.roleId,
-      roleId: initialRole?.id || initialRole?.roleId,
-      nameEnglish: nameEnglish.trim(),
-      nameMarathi: nameMarathi.trim().replace(/\r?\n/g, " "),
-      description: description.trim(),
-      status,
-      createdBy: initialRole?.createdBy || "Super Admin",
-      createdOn: initialRole?.createdOn || new Date().toISOString(),
-      firstName: nameEnglish.trim(),
-      fullNameMr: nameMarathi.trim().replace(/\r?\n/g, " "),
-      designation: description.trim(),
-    };
+ const payload = {
+   nameEnglish: nameEnglish.trim(),
+   nameMarathi: nameMarathi.trim(),
+   description: description.trim(),
+   status: status,
+   createdBy: "Super Admin",
+ };
 
     try {
       const response = isEditMode
@@ -121,7 +116,7 @@ export default function CreateRoleForm({
       if (onSuccess) {
         onSuccess(roleToShow);
       } else {
-        navigate("/admin", { state: { refreshRoles: true } });
+        navigate(ROUTES.adminDashboard, { state: { refreshRoles: true } });
       }
     } catch (err) {
       setApiError(err.message || "Failed to create role");

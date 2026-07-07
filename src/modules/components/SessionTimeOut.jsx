@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { logoutUser } from "../services/AuthService";
+import { logoutUser } from "../../features/auth/services/authService";
+import { ROUTES } from "../routes/routeConfig";
 
 const TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
@@ -16,7 +17,7 @@ export default function SessionTimeout() {
     } finally {
       localStorage.clear();
       alert("Session expired. Please login again.");
-      navigate("/");
+      navigate(ROUTES.root);
     }
   };
 

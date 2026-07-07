@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { validateLoginForm } from '../utils/validation'
-import { mockLoginCredentials } from '../data/staticData'
-import { loginUser, saveAuthData } from "../services/AuthService";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { validateLoginForm } from "../../shared/utils/validation";
+import { mockLoginCredentials } from "../../data/staticData";
+import { loginUser } from "../../features/auth/services/authService";
+import { ROUTES } from "../routes/routeConfig";
 
 export default function LoginForm({ userType }) {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ export default function LoginForm({ userType }) {
   const [messageType, setMessageType] = useState("");
 
   const captchaAnswer = mockLoginCredentials.captchaAnswer;
+
+  // const API_URL = import.meta.env.VITE_API_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,7 +59,7 @@ export default function LoginForm({ userType }) {
         setMessageType("success");
 
         setTimeout(() => {
-          navigate("/admin");
+          navigate(ROUTES.adminDashboard);
         }, 1000);
       } else {
         setMessage(result?.message || "Invalid username or password");

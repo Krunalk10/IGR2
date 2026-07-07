@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import LoginForm from '@/components/LoginForm'
+import LoginForm from "@/modules/components/LoginForm";
 import { adminPortalTabs, services } from '@/data/staticData'
 
 export default function Home() {

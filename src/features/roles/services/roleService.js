@@ -1,4 +1,4 @@
-import { apiRequest } from "./ApiClient";
+import { apiRequest } from "../../../shared/api/apiClient";
 
 const ROLE_STORAGE_KEY = "employeeRegistrationRoles";
 
@@ -55,44 +55,6 @@ function readStoredRoles() {
 function writeStoredRoles(roles) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(ROLE_STORAGE_KEY, JSON.stringify(roles));
-}
-
-export async function loginUser(username, password) {
-  const result = await apiRequest("/api/Auth/login", {
-    method: "POST",
-    body: JSON.stringify({
-      username,
-      password,
-    }),
-  });
-
-  if (!result.success) {
-    return result;
-  }
-
-  return {
-    success: true,
-    message: result.message,
-    user: result.data.user,
-    role: result.data.role,
-    accessToken: result.data.auth.accessToken,
-  };
-}
-
-export function saveAuthData(token, user) {
-  localStorage.setItem("accessToken", token);
-  localStorage.setItem("user", JSON.stringify(user));
-}
-
-export async function logoutUser() {
-  const result = await apiRequest("/api/Auth/logout", {
-    method: "POST",
-  });
-
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("user");
-
-  return result;
 }
 
 export async function createRole(roleData) {
@@ -153,6 +115,11 @@ export async function updateRole(roleData) {
     createdOn: roleData?.createdOn || new Date().toISOString(),
   };
 
+  const result = await apiRequest(`/api/RoleMaster/${roleId}`, {
+    method: "PUT",
+    body: JSON.stringify(normalizedPayload),
+  });
+
   const updatedRoles = existingRoles.map((role) =>
     String(role.id) === String(roleId)
       ? normalizeRole(normalizedPayload)
@@ -160,16 +127,31 @@ export async function updateRole(roleData) {
   );
   writeStoredRoles(updatedRoles);
 
+  if (!result.success) {
+    return {
+      success: true,
+      data: normalizeRole(normalizedPayload),
+      message:
+        result.message || "Role updated locally and will sync when available.",
+    };
+  }
+
   return {
     success: true,
     data: normalizeRole(normalizedPayload),
-    message: "Role updated successfully",
+    message: result.message || "Role updated successfully",
   };
 }
 
-export async function getRoles() {
+export async function getRoles(pageNumber = 1, pageSize = 10, filters = {}) {
   const storedRoles = readStoredRoles();
-  const result = await apiRequest("/api/EmployeeRegistration/register", {
+  const queryParams = new URLSearchParams({
+    pageNumber: pageNumber.toString(),
+    pageSize: pageSize.toString(),
+    ...filters,
+  });
+
+  const result = await apiRequest(`/api/RoleMaster?${queryParams}`, {
     method: "GET",
   });
 
@@ -182,8 +164,7 @@ export async function getRoles() {
     const normalizedRoles = payload.map((role, index) =>
       normalizeRole(role, index),
     );
-    const rolesToUse =
-      normalizedRoles.length > 0 ? normalizedRoles : storedRoles;
+    const rolesToUse = normalizedRoles.length > 0 ? normalizedRoles : storedRoles;
     writeStoredRoles(rolesToUse);
     return {
       success: true,

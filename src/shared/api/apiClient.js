@@ -1,16 +1,28 @@
 const API_BASE_URL = "http://13.232.164.116";
 
+function getAuthToken() {
+  if (typeof window === "undefined") return null;
+
+  const token = window.localStorage.getItem("accessToken");
+  return token ? token : null;
+}
+
 export async function apiRequest(endpoint, options = {}) {
   console.log("API URL:", `${API_BASE_URL}${endpoint}`);
   console.log("Request Options:", options);
 
   try {
+    const token = getAuthToken();
+    const headers = {
+      "Content-Type": "application/json",
+      Accept: "*/*",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    };
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "*/*",
-      },
       ...options,
+      headers,
     });
 
     console.log("Response Status:", response.status);
